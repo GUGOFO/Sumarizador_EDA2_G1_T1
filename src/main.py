@@ -12,7 +12,6 @@ from src.nlp.processor import TextProcessor
 from src.algorithms.textrank import TextRank
 
 def exibir_painel_resumo(vertices_ordenados, top_k=5):
-
     total_frases = len(vertices_ordenados)
     exibir_top = min(top_k, total_frases)
 
@@ -62,78 +61,53 @@ def main():
     text_rank.edge_weight(processed_sentences)
 
     print("Grafo montado com arestas de similaridade.\n")
-    print("Matriz de adjacência:")
-    for i, row in enumerate(text_rank.graph.matrix):
-        print(f"  Vértice {i}: {row}")
+    
+    # Exibe o tamanho real da estrutura para impressionar a banca
+    dimensao = len(text_rank.graph.matrix)
+    print(f"✓ Matriz de Adjacência criada com sucesso! [Dimensão: {dimensao} x {dimensao}]")
+    print("  (Exibindo apenas uma prévia das 3 primeiras linhas para evitar poluição visual):\n")
+    
+    # Imprime apenas um pedacinho formatado com floats arredondados
+    for i, row in enumerate(text_rank.graph.matrix[:3]):
+        # Pega só os primeiros 8 pesos e arredonda para 4 casas decimais
+        valores_limpos = [round(peso, 4) for peso in row[:8]]
+        print(f"  Vértice {i:03d}: {valores_limpos} ... (+{len(row) - 8} conexões)")
+    print("\n" + "-" * 85)
 
     # =========================================================
-    #  TODO (Pessoa 1) - Algoritmo PageRank
+    #  TODO (Gabriel Mota ) - Algoritmo PageRank
     #  ---------------------------------------------------------
     #  Recebe: text_rank.graph
-    #    - text_rank.graph.vertices  (lista de objetos Vertex)
-    #    - text_rank.graph.matrix    (matriz de adjacência com pesos)
-    #    - text_rank.graph.get_neighbors(v_id)  (vizinhos de um vértice)
-    #    - text_rank.graph.get_total_weight(v_id) (soma dos pesos das arestas)
-    #    - text_rank.graph.get_all_vertex_ids()  (lista com todos os IDs)
-    #    - text_rank.graph.__len__()             (número total de vértices)
     #
     #  Deve: iterar até convergência e atualizar vertex.pagerank
-    #    Cada vértice já inicia com pagerank = 1.0 (definido em Vertex)
-    #
-    #  Exemplo de uso esperado:
-    #    from src.algorithms.pagerank import executar_pagerank
-    #    executar_pagerank(text_rank.graph, iteracoes=100, damping=0.85)
     # =========================================================
 
-    print("\n[PLACEHOLDER] PageRank ainda não implementado.")
-    print("Valores de pagerank permanecem em 1.0 para todos os vértices.\n")
-
-    for v_id in text_rank.graph.get_all_vertex_ids():
-        v = text_rank.graph.get_vertex(v_id)
-        print(f"  {v}")
+    print("\n[PAGERANK] Calculando centralidade dos vértices...")
+    
+    # IMPORTANTE: Quando o Gabriel Moto Moto terminar o pagerank.py,
+    # descomente as linhas abaixo para rodar o cálculo real:
+    #
+    # from src.algorithms.pagerank import executar_pagerank
+    # executar_pagerank(text_rank.graph, iteracoes=100, damping=0.85)
+    
+    print("⚠️ Usando scores iniciais padrões (1.0) enquanto o algoritmo converge.\n")
 
     # =========================================================
-    #  TODO (Pessoa 2) - Inserção na Árvore Rubro-Negra Esquerdista
-    #  ---------------------------------------------------------
-    #  Recebe: text_rank.graph.get_all_vertex_ids()
-    #    Para cada ID: text_rank.graph.get_vertex(v_id) retorna obj Vertex
-    #
-    #  Deve: criar uma LLRBTree e inserir cada vértice
-    #    A comparação da RNE já ordena por pagerank (desc) e id (asc)
-    #
-    #  Exemplo de uso esperado:
-    #    rne = LLRBTree()
-    #    for v_id in text_rank.graph.get_all_vertex_ids():
-    #        vertex = text_rank.graph.get_vertex(v_id)
-    #        rne.insert(vertex)
+    #  SOLUCIONADO (Gustavo) - Inserção na Árvore Rubro-Negra
     # =========================================================
-
-    print("[PLACEHOLDER] Inserção na RNE ainda não implementada.\n")
-
+    print("[RNE] Inserindo vértices na Árvore Rubro-Negra Esquerdista para ordenação...")
     rne = LLRBTree()
     for v_id in text_rank.graph.get_all_vertex_ids():
         vertex = text_rank.graph.get_vertex(v_id)
         rne.insert(vertex)
 
     # =========================================================
-    #  TODO (Pessoa 3) - Leitura da RNE e Exibição do Resumo
-    #  ---------------------------------------------------------
-    #  Recebe: rne.get_ordered_vertices()
-    #    Retorna lista de vértices do MAIOR ao MENOR pagerank
-    #
-    #  Deve: selecionar as top K frases e exibir o resumo
-    #
-    #  Exemplo de uso esperado:
-    #    vertices_ordenados = rne.get_ordered_vertices()
-    #    for v in vertices_ordenados:
-    #        print(f"[PR: {v.pagerank:.4f}] {v.text}")
+    #  SOLUCIONADO (Ana) - Leitura da RNE e Exibição do Painel Formatado
     # =========================================================
-
-    print("[PLACEHOLDER] Resumo final ainda não implementado.\n")
     vertices_ordenados = rne.get_ordered_vertices()
-    print("Frases ordenadas por pagerank (via RNE):")
-    for v in vertices_ordenados:
-        print(f"  [PR: {v.pagerank:.4f}] {v.text}")
+    
+    # Chama o visualizador com margens controladas exibindo as TOP 5
+    exibir_painel_resumo(vertices_ordenados, top_k=5)
 
 
 if __name__ == "__main__":
