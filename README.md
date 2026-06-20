@@ -28,16 +28,16 @@ O texto bruto de entrada (`.txt`) passa pelo motor do `spaCy` (`pt_core_news_sm`
 * É feita a **lematização** (redução das palavras à sua forma canônica, ex: "obrigações" vira "obrigação"), garantindo precisão milimétrica na contagem de termos equivalentes.
 
 ### 2. Modelagem do Grafo
-O problema é mapeado como um **Grafo Valorados Não-Direcionado**:
+O problema é mapeado como um **Grafo Valorado Não-Direcionado**:
 * **Vértices (Nós):** Cada frase limpa extraída do texto representa um vértice único.
 * **Arestas (Conexões):** Uma aresta liga duas frases se elas compartilham pelo menos uma palavra em comum (após o filtro de PLN).
-* **Peso:** O peso da aresta corresponde à quantidade exata de palavras idênticas compartilhadas pelas duas frases.
+* **Peso:** O peso da aresta corresponde à quantidade exata de palavras idênticas compartilhadas pelas duas frases (similaridade textual).
 
 ### 3. Validação de Conectividade
 Antes de calcular a relevância, uma **Fila (Queue)** e uma **Pilha (Stack)** implementadas manualmente realizam uma busca em largura (BFS) para analisar a densidade e garantir que o algoritmo trafegue corretamente por componentes conexos do grafo.
 
 ### 4. Algoritmo PageRank e Desempate por Árvore
-O algoritmo calcula de forma iterativa a centralidade e importância de cada frase com base nos pesos das suas conexões. Em cenários de convergência com scores idênticos (empates no ranking das frases), o sistema faz o desempate inserindo os nós em uma **Árvore Rubro-Negra Esquerdista (Left-Leaning Red-Black Tree)** desenvolvida do zero, ordenando os critérios por ordem alfabética ou tamanho do texto.
+O algoritmo calcula de forma iterativa a centralidade e importância de cada frase com base nos pesos das suas conexões. Em cenários de convergência com scores idênticos (empates no ranking das frases), o sistema faz o desempate inserindo os nós em uma **Árvore Rubro-Negra Esquerdista (Left-Leaning Red-Black Tree)** desenvolvida do zero, ordenando os critérios por ID e garantindo a estabilidade do ranking.
 
 ---
 
@@ -65,6 +65,7 @@ O projeto segue uma estrutura estritamente modularizada para separar a lógica d
 │   │
 │   ├── algorithms/                   # Lógica matemática e centralidade
 │   │   ├── __init__.py
+│   │   ├── textrank.py               # Lógica de ponderação de arestas
 │   │   └── pagerank.py               # Algoritmo de ranqueamento textual iterativo
 │   │
 │   └── main.py                       # Ponto de entrada da aplicação (CLI Argparse)
@@ -98,22 +99,20 @@ Abra o terminal na raiz do projeto e execute o script correspondente ao seu sist
 
 ### 2. Rodando a Aplicação via CLI
 
-Com o ambiente ativado, execute o arquivo main.py passando os argumentos necessários. O arquivo de texto a ser testado deve estar localizado obrigatoriamente dentro da pasta inputs/.
+Com o ambiente ativado, execute o arquivo main.py passando o nome do arquivo de texto alvo. O arquivo deve estar localizado obrigatoriamente dentro da pasta inputs/.
 
 
 ```text
     # Ative a venv caso não esteja ativa:
     # Windows: venv\Scripts\activate  |  Linux/macOS: source venv/bin/activate
 
-    # Executar a análise exibindo as 5 frases mais importantes do termo do YouTube
-    python src/main.py --arquivo youtube.txt --top 5
+    # Executar a análise do termo do YouTube
+    python src/main.py --arquivo youtube.txt
 ```
 
 ## Uso de LLM no Desenvolvimento
 
-Em conformidade com o Critério 6 do edital, declara-se que modelos de linguagem de grande escala (LLMs) foram utilizados de forma assistiva durante o desenvolvimento deste trabalho para as seguintes atividades:
-
-* Revisão e geração de massa de dados fictícia coerente para validação de cenários complexos de colisão em Tabelas Hash.
+Conforme o Critério 6 do edital, declara-se que modelos de linguagem de grande escala (LLMs) foram utilizados de forma assistiva durante o desenvolvimento deste trabalho para as seguintes atividades:
 
 * Estruturação de tipagem estática informativa em trechos críticos das estruturas de dados para acelerar o processo de depuração de ponteiros em Python.
 
