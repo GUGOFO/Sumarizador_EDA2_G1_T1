@@ -44,8 +44,9 @@ class TextRank:
                 total = total_a + total_b
 
                 # peso = palavras em comum / total de palavras (sem repetir comuns)
-                if common > 0:
-                    weight = common / (total - common)
+                if common >= 2:
+                    length_penalty = min(total_a, total_b) / max(total_a, total_b)
+                    weight = (common / (total_a + total_b - common)) * length_penalty
                     self.graph.add_edge(i, j, weight)
 
         return self.graph.matrix
