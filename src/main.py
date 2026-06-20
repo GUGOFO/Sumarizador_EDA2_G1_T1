@@ -12,10 +12,19 @@ from src.nlp.processor import TextProcessor
 from src.algorithms.textrank import TextRank
 from src.algorithms.pagerank import Pagerank
 
-def exibir_painel_resumo(vertices_ordenados, top_k=5):
+def exibir_painel_resumo(vertices_ordenados, porcentagem_corte):
+    """
+    Formata e exibe o resultado final no terminal de forma organizada,
+    destacando a cláusula mais importante e listando o corte percentual dinâmico.
+    """
     total_frases = len(vertices_ordenados)
-    exibir_top = min(top_k, total_frases)
+    if total_frases == 0:
+        print("[ERRO] Nenhum vértice disponível para exibição.")
+        return
 
+    # Calcula dinamicamente o número de frases com base na porcentagem escolhida
+    limite_frases = max(1, int(total_frases * (porcentagem_corte / 100)))
+    
     LARGURA_MARGEM = 85
 
     print("\n" + "=" * LARGURA_MARGEM)
@@ -23,31 +32,48 @@ def exibir_painel_resumo(vertices_ordenados, top_k=5):
     print(f"{'FCTE - UNIVERSIDADE DE BRASÍLIA (UnB) - EDA 2':^{LARGURA_MARGEM}}")
     print("=" * LARGURA_MARGEM)
     
-    print(f" Encontradas: {total_frases} sentenças processadas no documento.")
-    print(f" Exibindo as {exibir_top} cláusulas mais críticas ordenadas via RNE (Rubro-Negra).")
+    print(f" Total no Documento: {total_frases} sentenças processadas.")
+    print(f" Corte Selecionado : {porcentagem_corte}% do texto (Resultando em {limite_frases} frases).")
     print("-" * LARGURA_MARGEM)
 
-    for posicao, vertex in enumerate(vertices_ordenados[:exibir_top], 1):
-        header = f" [{posicao}º Lugar] - SCORE PAGERANK: {vertex.pagerank:.4f} (ID: {vertex.id}) "
-        print(f"\n{header:-<{LARGURA_MARGEM}}")
+    primeiro = vertices_ordenados[0]
+    print(f"\n🏆 CLÁUSULA CRÍTICA SOBERANA (1º LUGAR) - SCORE PR: {primeiro.pagerank:.6f} (ID: {primeiro.id})")
+    print(" " + "═" * (LARGURA_MARGEM - 2))
+    
+    texto_1 = primeiro.text
+    chunk_size = LARGURA_MARGEM - 6
+    for i in range(0, len(texto_1), chunk_size):
+        print(f"   {texto_1[i:i+chunk_size]}")
+    print(" " + "═" * (LARGURA_MARGEM - 2))
+
+    if limite_frases > 1:
+        print(f"\n📋 OUTRAS SENTENÇAS RELEVANTES DENTRO DOS {porcentagem_corte}% DO CORTE:")
+        print("-" * LARGURA_MARGEM)
         
-        texto = vertex.text
-        chunk_size = LARGURA_MARGEM - 4
-        for i in range(0, len(texto), chunk_size):
-            print(f"  {texto[i:i+chunk_size]}")
+        for posicao, vertex in enumerate(vertices_ordenados[1:limite_frases], 2):
+            header = f" [{posicao}º Lugar] - SCORE PR: {vertex.pagerank:.6f} (ID: {vertex.id}) "
+            print(f" {header:-<{LARGURA_MARGEM-2}}")
             
-    print("\n" + "-" * LARGURA_MARGEM)
+            texto = vertex.text
+            for i in range(0, len(texto), chunk_size):
+                print(f"   {texto[i:i+chunk_size]}")
+            print()
+            
+    print("-" * LARGURA_MARGEM)
     print(f"{'ANÁLISE ESTATÍSTICA DO CONTRATO':^{LARGURA_MARGEM}}")
     print("-" * LARGURA_MARGEM)
     
-    reducao = (1 - (exibir_top / total_frases)) * 100 if total_frases > 0 else 0
-    print(f" * Taxa de redução de leitura imposta ao usuário: {reducao:.2f}%")
+    reducao = (1 - (limite_frases / total_frases)) * 100
+    print(f" * Taxa de compressão de leitura imposta ao usuário: {reducao:.2f}%")
     print(f" * Status de integridade das estruturas de dados: 100% Manuais (Sem NetworkX/Pandas)")
     print("=" * LARGURA_MARGEM + "\n")
+
 
 def main():
     parser = argparse.ArgumentParser(description="Sumarizador de textos com TextRank")
     parser.add_argument("--arquivo", required=True, help="Nome do arquivo .txt na pasta inputs/")
+    # Nova flag adicionada para capturar a porcentagem dinâmica informada pelo usuário
+    parser.add_argument("--porcentagem", type=int, default=20, help="Porcentagem de frases para o resumo (ex: 20)")
     args = parser.parse_args()
 
     inputs_dir = os.path.join(project_root, "inputs")
@@ -68,14 +94,9 @@ def main():
     print("  (Exibindo apenas uma prévia das 3 primeiras linhas para evitar poluição visual):\n")
     
     for i, row in enumerate(text_rank.graph.matrix[:3]):
-        # Pega só os primeiros 8 pesos e arredonda para 4 casas decimais
         valores_limpos = [round(peso, 4) for peso in row[:8]]
         print(f"  Vértice {i:03d}: {valores_limpos} ... (+{len(row) - 8} conexões)")
     print("\n" + "-" * 85)
-
-    # =========================================================
-    #  SOLUCIONADO (Gabriel) - Algoritmo PageRank Ponderado
-    # =========================================================
 
     print("\n[PAGERANK] Calculando centralidade dos vértices...")
     Pagerank(
@@ -87,21 +108,16 @@ def main():
     )
     print("[PAGERANK] Scores finais atualizados nos vértices.\n")
 
-    # =========================================================
-    #  SOLUCIONADO (Gustavo) - Inserção na Árvore Rubro-Negra
-    # =========================================================
     print("[RNE] Inserindo vértices na Árvore Rubro-Negra Esquerdista para ordenação...")
     rne = LLRBTree()
     for v_id in text_rank.graph.get_all_vertex_ids():
         vertex = text_rank.graph.get_vertex(v_id)
         rne.insert(vertex)
 
-    # =========================================================
-    #  SOLUCIONADO (Ana) - Leitura da RNE e Exibição do Painel Formatado
-    # =========================================================
     vertices_ordenados = rne.get_ordered_vertices()
     
-    exibir_painel_resumo(vertices_ordenados, top_k=5)
+    # Passa a lista ordenada pela sua RNE e a porcentagem vinda do terminal
+    exibir_painel_resumo(vertices_ordenados, porcentagem_corte=args.porcentagem)
 
 
 if __name__ == "__main__":
