@@ -103,11 +103,14 @@ Com o ambiente ativado, execute o arquivo main.py passando o nome do arquivo de 
 
 
 ```text
-    # Ative a venv caso não esteja ativa:
-    # Windows: venv\Scripts\activate  |  Linux/macOS: source venv/bin/activate
-
-    # Executar a análise do termo do YouTube
+    # Executar a análise com o corte padrão de 20% do texto
     python src/main.py --arquivo youtube.txt
+
+    # Executar extraindo apenas os 10% mais importantes do contrato
+    python src/main.py --arquivo youtube.txt --porcentagem 10
+
+    # Executar extraindo um resumo mais robusto de 35% do documento
+    python src/main.py --arquivo youtube.txt --porcentagem 35
 ```
 
 ## Uso de LLM no Desenvolvimento
