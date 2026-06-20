@@ -1,6 +1,7 @@
 import argparse
 import os
 import sys
+import textwrap
 
 project_root = os.path.join(os.path.dirname(__file__), "..")
 sys.path.insert(0, project_root)
@@ -40,10 +41,9 @@ def exibir_painel_resumo(vertices_ordenados, porcentagem_corte):
     print(f"\n🏆 CLÁUSULA CRÍTICA SOBERANA (1º LUGAR) - SCORE PR: {primeiro.pagerank:.6f} (ID: {primeiro.id})")
     print(" " + "═" * (LARGURA_MARGEM - 2))
     
-    texto_1 = primeiro.text
-    chunk_size = LARGURA_MARGEM - 6
-    for i in range(0, len(texto_1), chunk_size):
-        print(f"   {texto_1[i:i+chunk_size]}")
+    linhas_texto_1 = textwrap.wrap(primeiro.text, width=LARGURA_MARGEM - 8)
+    for linha in linhas_texto_1:
+        print(f"   {linha}")
     print(" " + "═" * (LARGURA_MARGEM - 2))
 
     if limite_frases > 1:
@@ -54,9 +54,10 @@ def exibir_painel_resumo(vertices_ordenados, porcentagem_corte):
             header = f" [{posicao}º Lugar] - SCORE PR: {vertex.pagerank:.6f} (ID: {vertex.id}) "
             print(f" {header:-<{LARGURA_MARGEM-2}}")
             
-            texto = vertex.text
-            for i in range(0, len(texto), chunk_size):
-                print(f"   {texto[i:i+chunk_size]}")
+            # Aplica a mesma quebra inteligente para as demais frases
+            linhas_texto = textwrap.wrap(vertex.text, width=LARGURA_MARGEM - 8)
+            for linha in linhas_texto:
+                print(f"   {linha}")
             print()
             
     print("-" * LARGURA_MARGEM)
