@@ -11,6 +11,39 @@ from src.structures.rne import LLRBTree
 from src.nlp.processor import TextProcessor
 from src.algorithms.textrank import TextRank
 
+def exibir_painel_resumo(vertices_ordenados, top_k=5):
+
+    total_frases = len(vertices_ordenados)
+    exibir_top = min(top_k, total_frases)
+
+    LARGURA_MARGEM = 85
+
+    print("\n" + "=" * LARGURA_MARGEM)
+    print(f"{'RELATÓRIO DE SUMARIZAÇÃO EXECUTIVA - TEXTRANK':^{LARGURA_MARGEM}}")
+    print(f"{'FCTE - UNIVERSIDADE DE BRASÍLIA (UnB) - EDA 2':^{LARGURA_MARGEM}}")
+    print("=" * LARGURA_MARGEM)
+    
+    print(f" Encontradas: {total_frases} sentenças processadas no documento.")
+    print(f" Exibindo as {exibir_top} cláusulas mais críticas ordenadas via RNE (Rubro-Negra).")
+    print("-" * LARGURA_MARGEM)
+
+    for posicao, vertex in enumerate(vertices_ordenados[:exibir_top], 1):
+        header = f" [{posicao}º Lugar] - SCORE PAGERANK: {vertex.pagerank:.4f} (ID: {vertex.id}) "
+        print(f"\n{header:-<{LARGURA_MARGEM}}")
+        
+        texto = vertex.text
+        chunk_size = LARGURA_MARGEM - 4
+        for i in range(0, len(texto), chunk_size):
+            print(f"  {texto[i:i+chunk_size]}")
+            
+    print("\n" + "-" * LARGURA_MARGEM)
+    print(f"{'ANÁLISE ESTATÍSTICA DO CONTRATO':^{LARGURA_MARGEM}}")
+    print("-" * LARGURA_MARGEM)
+    
+    reducao = (1 - (exibir_top / total_frases)) * 100 if total_frases > 0 else 0
+    print(f" * Taxa de redução de leitura imposta ao usuário: {reducao:.2f}%")
+    print(f" * Status de integridade das estruturas de dados: 100% Manuais (Sem NetworkX/Pandas)")
+    print("=" * LARGURA_MARGEM + "\n")
 
 def main():
     parser = argparse.ArgumentParser(description="Sumarizador de textos com TextRank")

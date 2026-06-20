@@ -1,7 +1,7 @@
 import os
 import spacy
 
-from ..structures.hash_table import contar_palavras
+from src.structures.hash_table import contar_palavras
 
 class TextProcessor:
     """Processa texto bruto, separando frases e criando HashTable por frase."""
@@ -33,12 +33,12 @@ class TextProcessor:
             - "hash_table": HashTable com contagem de palavras da frase
         """
         doc = self.nlp(raw_text)
-
         processed_sentences = []
 
         for sentence in doc.sents:
             cleaned_sentence_text = sentence.text.strip()
 
+            # Pula linhas ou quebras vazias
             if not cleaned_sentence_text:
                 continue
 
@@ -49,7 +49,9 @@ class TextProcessor:
                     lemma_word = token.lemma_.lower()
                     cleaned_tokens.append(lemma_word)
 
+            # Só armazena se a frase contiver palavras úteis após o filtro de PLN
             if cleaned_tokens:
+                # Usa a HashTable do Matheus para mapear a frequência local
                 hash_table = contar_palavras(sentence)
                 processed_sentences.append({
                     "original_text": cleaned_sentence_text,
