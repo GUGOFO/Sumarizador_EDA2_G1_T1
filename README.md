@@ -102,16 +102,22 @@ Abra o terminal na raiz do projeto e execute o script correspondente ao seu sist
 Com o ambiente ativado, execute o arquivo main.py passando o nome do arquivo de texto alvo. O arquivo deve estar localizado obrigatoriamente dentro da pasta inputs/.
 
 
-```text
-    # Executar a análise com o corte padrão de 20% do texto
-    python src/main.py --arquivo youtube.txt
-
-    # Executar extraindo apenas os 10% mais importantes do contrato
-    python src/main.py --arquivo youtube.txt --porcentagem 10
-
-    # Executar extraindo um resumo mais robusto de 35% do documento
-    python src/main.py --arquivo youtube.txt --porcentagem 35
-```
+>     # Executa com extração usando a formula `Média + k * Desvio Padrão` (usuário passa 'K' alterando o 1.0 no final)
+>     python src/main.py --arquivo youtube.txt --k 1.0
+>
+>     # Executa para um resumo menor
+>     python src/main.py --arquivo youtube.txt --k 2.0
+> 
+> ---
+> 
+>     # Executar a análise com o corte padrão de 20% do texto
+>     python src/main.py --arquivo youtube.txt
+> 
+>     # Executar extraindo apenas os 10% mais importantes do contrato
+>     python src/main.py --arquivo youtube.txt --porcentagem 10
+> 
+>     # Executar extraindo um resumo mais robusto de 35% do documento
+>     python src/main.py --arquivo youtube.txt --porcentagem 35
 
 ## Uso de LLM no Desenvolvimento
 
