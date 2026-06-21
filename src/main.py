@@ -1,4 +1,5 @@
 import argparse
+import math
 import os
 import sys
 import textwrap
@@ -13,32 +14,57 @@ from src.nlp.processor import TextProcessor
 from src.algorithms.textrank import TextRank
 from src.algorithms.pagerank import Pagerank
 
-def exibir_painel_resumo(vertices_ordenados, porcentagem_corte):
+def exibir_painel_resumo(vertices_ordenados, porcentagem_corte=20, k=None):
     """
-    Formata e exibe o resultado final no terminal de forma organizada,
-    destacando a cláusula mais importante e listando o corte percentual dinâmico.
+    Formata e exibe o resultado final no terminal de forma organizada.
+    Suporta seleção por porcentagem ou por Média + k * Desvio Padrão.
     """
     total_frases = len(vertices_ordenados)
     if total_frases == 0:
         print("[ERRO] Nenhum vértice disponível para exibição.")
         return
 
-    # Calcula dinamicamente o número de frases com base na porcentagem escolhida
-    limite_frases = max(1, int(total_frases * (porcentagem_corte / 100)))
-    
     LARGURA_MARGEM = 85
+    selecionados = []
+    criterio_texto = ""
+    metodo = ""
+
+    if k is not None:
+        metodo = "Estatístico"
+        scores = [v.pagerank for v in vertices_ordenados]
+        media = sum(scores) / total_frases
+        variancia = sum((score - media) ** 2 for score in scores) / total_frases
+        desvio = math.sqrt(variancia)
+        limite_importancia = media + k * desvio
+        criterio_texto = f"Média + k * Desvio Padrão = {limite_importancia:.6f}"
+        selecionados = [v for v in vertices_ordenados if v.pagerank > limite_importancia]
+        if not selecionados:
+            selecionados = [vertices_ordenados[0]]
+    else:
+        metodo = "Porcentagem"
+        limite_frases = max(1, int(total_frases * (porcentagem_corte / 100)))
+        criterio_texto = f"{porcentagem_corte}% do texto"
+        selecionados = vertices_ordenados[:limite_frases]
+
+    limite_frases = len(selecionados)
 
     print("\n" + "=" * LARGURA_MARGEM)
     print(f"{'RELATÓRIO DE SUMARIZAÇÃO EXECUTIVA - TEXTRANK':^{LARGURA_MARGEM}}")
     print(f"{'FCTE - UNIVERSIDADE DE BRASÍLIA (UnB) - EDA 2':^{LARGURA_MARGEM}}")
     print("=" * LARGURA_MARGEM)
-    
-    print(f" Total no Documento: {total_frases} sentenças processadas.")
-    print(f" Corte Selecionado : {porcentagem_corte}% do texto (Resultando em {limite_frases} frases).")
+    print(f" Total no Documento  : {total_frases} sentenças processadas.")
+    print(f" Método de seleção   : {metodo}")
+    if(metodo == "Estatístico"):
+        print(f" Média               : {media}")
+        print(f" K                   : {k}")
+        print(f" Desvio padrão       : {desvio}")
+    print(f" Critério            : {criterio_texto}")
+
+    print(f" Frases selecionadas : {limite_frases}")
     print("-" * LARGURA_MARGEM)
 
-    primeiro = vertices_ordenados[0]
-    print(f"\n🏆 CLÁUSULA CRÍTICA SOBERANA (1º LUGAR) - SCORE PR: {primeiro.pagerank:.6f} (ID: {primeiro.id})")
+    primeiro = selecionados[0]
+    print(f"\n🏆 CLÁUSULA CRÍTICA SOBERANA (1º Lugar) - SCORE PR: {primeiro.pagerank:.6f} (ID: {primeiro.id})")
     print(" " + "═" * (LARGURA_MARGEM - 2))
     
     linhas_texto_1 = textwrap.wrap(primeiro.text, width=LARGURA_MARGEM - 8)
@@ -47,19 +73,16 @@ def exibir_painel_resumo(vertices_ordenados, porcentagem_corte):
     print(" " + "═" * (LARGURA_MARGEM - 2))
 
     if limite_frases > 1:
-        print(f"\n📋 OUTRAS SENTENÇAS RELEVANTES DENTRO DOS {porcentagem_corte}% DO CORTE:")
+        print(f"\n📋 OUTRAS SENTENÇAS RELEVANTES SELECIONADAS:")
         print("-" * LARGURA_MARGEM)
-        
-        for posicao, vertex in enumerate(vertices_ordenados[1:limite_frases], 2):
+        for posicao, vertex in enumerate(selecionados[1:], 2):
             header = f" [{posicao}º Lugar] - SCORE PR: {vertex.pagerank:.6f} (ID: {vertex.id}) "
             print(f" {header:-<{LARGURA_MARGEM-2}}")
-            
-            # Aplica a mesma quebra inteligente para as demais frases
             linhas_texto = textwrap.wrap(vertex.text, width=LARGURA_MARGEM - 8)
             for linha in linhas_texto:
                 print(f"   {linha}")
             print()
-            
+
     print("-" * LARGURA_MARGEM)
     print(f"{'ANÁLISE ESTATÍSTICA DO CONTRATO':^{LARGURA_MARGEM}}")
     print("-" * LARGURA_MARGEM)
@@ -73,8 +96,8 @@ def exibir_painel_resumo(vertices_ordenados, porcentagem_corte):
 def main():
     parser = argparse.ArgumentParser(description="Sumarizador de textos com TextRank")
     parser.add_argument("--arquivo", required=True, help="Nome do arquivo .txt na pasta inputs/")
-    # Nova flag adicionada para capturar a porcentagem dinâmica informada pelo usuário
     parser.add_argument("--porcentagem", type=int, default=20, help="Porcentagem de frases para o resumo (ex: 20)")
+    parser.add_argument("--k", type=float, help="Multiplicador k do desvio padrão para o critério de seleção")
     args = parser.parse_args()
 
     inputs_dir = os.path.join(project_root, "inputs")
@@ -117,8 +140,11 @@ def main():
 
     vertices_ordenados = rne.get_ordered_vertices()
     
-    # Passa a lista ordenada pela sua RNE e a porcentagem vinda do terminal
-    exibir_painel_resumo(vertices_ordenados, porcentagem_corte=args.porcentagem)
+    exibir_painel_resumo(
+        vertices_ordenados,
+        porcentagem_corte=args.porcentagem,
+        k=args.k,
+    )
 
 
 if __name__ == "__main__":
