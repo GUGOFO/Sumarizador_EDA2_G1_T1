@@ -1,6 +1,16 @@
 # Sumarizador_EDA2_G1_T1
 
-Trabalho Final apresentado à disciplina de **Estruturas de Dados 2 (EDA 2)** **Universidade de Brasília (UnB) – Campus Gama (FCTE)** **Grupo 1** | Turma: T01  
+Trabalho Final apresentado à disciplina de **Estruturas de Dados 2 (EDA 2)** **Universidade de Brasília (UnB) – Campus Gama (FCTE)** **Grupo 1** | Turma: T01 
+
+##  Integrantes do Grupo
+
+| Nome | Matrícula |
+| :--- | :---: |
+| Gustavo Gomes Fornaciari | 241032519 |
+| Ana Beatriz Souza Araujo | 241025891 |
+| Gabriel Mota Oliveira | 241011081 |
+| Matheus Pinheiro | 241025336 |
+| Gabriel Alves de Araujo | 241025523 |
 
 ---
 
