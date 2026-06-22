@@ -85,7 +85,10 @@ No fim de cada execução, o painel exibe a **Taxa de Compressão de Leitura**, 
 
 ```text
 ├── inputs/                           # Contratos reais para testes do professor
+│   ├── betano.txt                    # Termos do Betano
+│   ├── chatgpt.txt                   # Termos do ChatGPT
 │   ├── instagram.txt                 # Termos do Instagram
+│   ├── tiktok.txt                    # Termos do TikTok
 │   ├── twitter.txt                   # Termos do Twitter / X
 │   └── youtube.txt                   # Termos do YouTube
 │

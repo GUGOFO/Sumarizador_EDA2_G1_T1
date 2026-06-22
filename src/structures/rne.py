@@ -1,7 +1,6 @@
 RED = True
 BLACK = False
 
-
 class RNode:
     """Nó da Árvore Rubro-Negra Esquerdista que guarda um vértice."""
     def __init__(self, vertex):
@@ -32,7 +31,7 @@ class LLRBTree:
         return x
 
     def _rotate_right(self, h: RNode) -> RNode:
-        """Rotação para direita:平衡a subárvore com filho à esquerda."""
+        """Rotação para direita: a subárvore com filho à esquerda."""
         x = h.left
         h.left = x.right
         x.right = h
@@ -55,7 +54,7 @@ class LLRBTree:
         return -1 if v1.id < v2.id else 1
 
     def insert(self, vertex):
-        """Insere um vértice na árvore e平衡a após a inserção."""
+        """Insere um vértice na árvore e após a inserção."""
         self.root = self._insert(self.root, vertex)
         self.root.color = BLACK
 
