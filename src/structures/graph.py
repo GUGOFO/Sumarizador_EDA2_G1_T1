@@ -64,7 +64,7 @@ class Graph:
         """Retorna lista com todos os IDs dos vértices existentes."""
         return [v.id for v in self.vertices if v is not None]
 
-    def get_total_weight(self, vertex_id: int) -> int:
+    def get_total_weight(self, vertex_id: int) -> float:
         """Soma dos pesos de todas as arestas que saem do vértice (usado no PageRank)."""
         if vertex_id >= len(self.matrix):
             return 0

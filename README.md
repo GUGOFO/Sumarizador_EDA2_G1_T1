@@ -1,88 +1,117 @@
 # Sumarizador_EDA2_G1_T1
 
-## Visão Geral do Projeto
-Este projeto foi desenvolvido como trabalho final para a disciplina de **Estruturas de Dados 2 (EDA 2)** da Universidade de Brasília (UnB), campus Gama (FCTE). 
-
-O sistema aborda um problema real na área de **Defesa do Consumidor**: a dificuldade de ler e extrair cláusulas críticas em Termos de Serviço, Políticas de Privacidade e contratos de adesão longos, cansativos e repletos de "juridiquês". Utilizando técnicas de **Processamento de Linguagem Natural (PLN)** e **Algoritmos em Grafos**, a aplicação transforma o texto em uma rede interconectada de conceitos e aplica o algoritmo **PageRank** para classificar e retornar as frases estatisticamente mais relevantes (cláusulas críticas) diretamente no terminal.
+Trabalho Final apresentado à disciplina de **Estruturas de Dados 2 (EDA 2)** **Universidade de Brasília (UnB) – Campus Gama (FCTE)** **Grupo 1** | Turma: T01  
 
 ---
 
-## Requisitos e Escopo Técnico
+## 1. Descrição do Problema
 
-Para cumprir rigorosamente as diretrizes e penalidades do edital da disciplina, o projeto foi arquitetado sob as seguintes regras:
-* **Linguagem Principal:** Python 3.
-* **Dependência Externa Permitida:** Apenas a biblioteca `spaCy` para quebra de sentenças, remoção de *stop words* e lematização.
-* **Estruturas de Dados Próprias (100% implementadas à mão):** Proibido o uso de estruturas prontas do Python para a lógica principal do grafo e ordenação.
-* **Interface:** Execução puramente via terminal (CLI) aceitando argumentos dinâmicos.
-* **Prazo Final de Entrega:** Repositório atualizado até **22/06/2026**.
+Este projeto resolve um problema muito comum e real no nosso dia a dia, unindo **Processamento de Linguagem Natural (PLN)** e a **Defesa do Consumidor**: a dificuldade prática de ler e entender Termos de Serviço e Políticas de Privacidade digitais. Por serem textos longos, cansativos e repletos de "juridiquês", a grande maioria das pessoas aceita esses contratos sem ter a menor ideia das obrigações ou das armadilhas que estão escondidas ali.
+
+A proposta do nosso sistema é automatizar esse processo por meio de **sumarização extrativa**. O programa analisa o texto do contrato, calcula a relevância estatística de cada frase e extrai as cláusulas realmente críticas, gerando um relatório limpo e direto no terminal para o usuário.
 
 ---
 
-## Modelagem e Solução
+## 2. Qualidade e Coerência dos Dados
 
-### 1. Processamento de Texto (PLN)
-O texto bruto de entrada (`.txt`) passa pelo motor do `spaCy` (`pt_core_news_sm`), onde:
-* O texto é segmentado em frases reais.
-* Aplica-se `.lower()` em todos os caracteres.
-* Filtram-se pontuações, números isolados e *stop words* (artigos, preposições, etc.).
-* É feita a **lematização** (redução das palavras à sua forma canônica, ex: "obrigações" vira "obrigação"), garantindo precisão milimétrica na contagem de termos equivalentes.
+Para validar a nossa solução, usamos contratos reais e extensos que exigem bastante do algoritmo. Os arquivos de teste ficam na pasta `inputs/` e incluem:
+* **`youtube.txt`**: Os Termos de Serviço completos do YouTube.
+* **`instagram.txt`**: Os Termos de Uso atualizados do Instagram.
+* **`twitter.txt`**: As condições gerais e termos da plataforma Twitter (agora X).
 
-### 2. Modelagem do Grafo
-O problema é mapeado como um **Grafo Valorado Não-Direcionado**:
-* **Vértices (Nós):** Cada frase limpa extraída do texto representa um vértice único.
-* **Arestas (Conexões):** Uma aresta liga duas frases se elas compartilham pelo menos uma palavra em comum (após o filtro de PLN).
-* **Peso:** O peso da aresta corresponde à quantidade exata de palavras idênticas compartilhadas pelas duas frases (similaridade textual).
-
-### 3. Validação de Conectividade
-Antes de calcular a relevância, uma **Fila (Queue)** e uma **Pilha (Stack)** implementadas manualmente realizam uma busca em largura (BFS) para analisar a densidade e garantir que o algoritmo trafegue corretamente por componentes conexos do grafo.
-
-### 4. Algoritmo PageRank e Desempate por Árvore
-O algoritmo calcula de forma iterativa a centralidade e importância de cada frase com base nos pesos das suas conexões. Em cenários de convergência com scores idênticos (empates no ranking das frases), o sistema faz o desempate inserindo os nós em uma **Árvore Rubro-Negra Esquerdista (Left-Leaning Red-Black Tree)** desenvolvida do zero, ordenando os critérios por ID e garantindo a estabilidade do ranking.
+Essas bases de dados possuem centenas de sentenças complexas, trechos inteiros em caixa alta (como as isenções de responsabilidade jurídica) e repetições de conceitos importantes em diferentes seções. Isso serviu perfeitamente para testar o desempenho e o estresse das nossas estruturas de dados.
 
 ---
 
-## Arquitetura do Repositório
+## 3. Engenharia de Estruturas de Dados Próprias 
 
-O projeto segue uma estrutura estritamente modularizada para separar a lógica de negócio das estruturas de dados brutas:
+Seguindo a regra do trabalho de não usar bibliotecas prontas (como *NetworkX, Pandas ou coleções prontas do Python*), **todas as estruturas fundamentais do projeto foram implementadas do zero pela nossa equipe**:
+
+* **O Grafo de Sentenças (`graph.py`):** Representado por uma **Matriz de Adjacência dinâmica**. Cada frase vira um nó (com ID e score PageRank), conectado a outro (aresta) se compartilharem **pelo menos 2 palavras relevantes em comum**.
+* **A HashTable com Encadeamento (`hash_table.py`):** Armazena e conta a frequência de palavras por frase. O tratamento de colisões usa **Lista Ligada Simples**, inserindo novos nós de maneira eficiente no início da cadeia daquela posição.
+* **A Árvore Rubro-Negra Esquerdista (`rne.py`):** Organiza o ranking final das frases por meio de um balanceamento perfeito (com rotações e inversão de cores). Se houver empate nos scores de PageRank, usa de forma estável o ID numérico dos vértices como critério de desempate.
+
+---
+
+## 4. Algoritmos de Processamento e Grafos
+
+O pipeline do nosso sistema funciona em três etapas bem definidas:
 
 ```text
-├── inputs/                           # Arquivos de texto (.txt) para testes do professor
-│   └── youtube.txt                   # Exemplo de Termo de Serviço do YouTube
+ [Texto Bruto] ➔ [spaCy (PLN/Lemas)] ➔ [HashTable por Frase]
+                                                │
+                                                ▼
+ [Árvore RNE Ordenada] ◀ [PageRank Ponderado] ◀ [Matriz TextRank]
+           │
+           ▼
+ [Painel de Resumo CLI]
+```
+
+## 1. Extração e Filtro de PLN (`processor.py`)
+O texto bruto passa pelo motor do `spaCy` (`pt_core_news_sm`) para ser segmentado em frases reais. O filtro limpa pontuações, espaços e *stop words* (como artigos e preposições), e aplica a **lematização** (reduzindo palavras como "reivindicaram" e "reivindicações" para a raiz "reivindicação") com normalização em caixa baixa (`.lower()`).
+
+### 2. Ponderação TextRank (`textrank.py`)
+Para cada par de frases $(i, j)$, cruzamos os dados de uma HashTable com a busca da outra. Se houver interseção ($\ge 2$ palavras em comum), calculamos o peso da aresta aplicando uma **penalidade de tamanho** (`length_penalty`). Isso impede que frases gigantescas dominem o grafo injustamente apenas por terem mais palavras:
+$$\text{weight} = \frac{\text{comuns}}{\text{total}_a + \text{total}_b - \text{comuns}} \times \frac{\min(\text{total}_a, \text{total}_b)}{\max(\text{total}_a, \text{total}_b)}$$
+
+### 3. PageRank Ponderado (`pagerank.py`)
+O algoritmo calcula a importância de cada frase de forma iterativa. Ele trata de forma rigorosa as frases sem saída (**dangling mass**), distribuindo essa perda de massa de maneira síncrona e equilibrada entre todos os nós a cada iteração. O cálculo para de rodar assim que a variação máxima entre as rodadas fica abaixo da nossa meta de convergência (`tolerancia=1e-6`).
+
+---
+
+## 5. Análise e Interpretação dos Resultados
+
+Nosso software oferece **dois métodos estatísticos** para o usuário escolher como deseja filtrar o resumo final:
+
+1. **Seleção por Corte Percentual Dinâmico (`--porcentagem`):** Filtra os top $X\%$ nós de maior autoridade no grafo, separando e destacando visualmente a **Cláusula Soberana (1º Lugar)** em uma moldura especial no terminal.
+2. **Seleção por Critério Estatístico (`--k`):** Exibe apenas as sentenças que estão na curva mais alta de relevância da distribuição do contrato. O corte é feito de forma puramente matemática onde:
+$$\text{Score PR} > \text{Média} + (k \times \text{Desvio Padrão})$$
+
+No fim de cada execução, o painel exibe a **Taxa de Compressão de Leitura**, mostrando em porcentagem o quanto de texto redundante foi poupado para o usuário.
+
+---
+
+## 6. Arquitetura do Repositório
+
+```text
+├── inputs/                           # Contratos reais para testes do professor
+│   ├── instagram.txt                 # Termos do Instagram
+│   ├── twitter.txt                   # Termos do Twitter / X
+│   └── youtube.txt                   # Termos do YouTube
 │
 ├── src/
 │   ├── __init__.py
 │   │
-│   ├── structures/                   # Estruturas de dados feitas estritamente na mão
+│   ├── structures/                   # Nossas estruturas de dados (Feitas à mão)
 │   │   ├── __init__.py
-│   │   ├── linear.py                 # Implementação de Pilha e Fila manuais
-│   │   ├── hash_table.py             # Tabela Hash com tratamento de colisão por encadeamento
-│   │   ├── graph.py                  # Grafo Não-Direcionado com Lista de Adjacência própria
-│   │   └── rne.py                    # Árvore Rubro-Negra Esquerdista (LLRB Tree)
+│   │   ├── hash_table.py             # HashTable manual com lista encadeada
+│   │   ├── graph.py                  # Grafo baseado em Matriz de Adjacência
+│   │   └── rne.py                    # Árvore Rubro-Negra de ordenação
 │   │
-│   ├── nlp/                          # Filtros e tratamento de texto
+│   ├── nlp/                          # Módulos de PLN
 │   │   ├── __init__.py
-│   │   └── processor.py              # Integração controlada com spaCy
+│   │   └── processor.py              # Processamento e lematização com spaCy
 │   │
-│   ├── algorithms/                   # Lógica matemática e centralidade
+│   ├── algorithms/                   # Motores e lógica matemática
 │   │   ├── __init__.py
-│   │   ├── textrank.py               # Lógica de ponderação de arestas
-│   │   └── pagerank.py               # Algoritmo de ranqueamento textual iterativo
+│   │   ├── textrank.py               # Lógica de pesos e similaridade
+│   │   └── pagerank.py               # PageRank iterativo com tratamento de dangling
 │   │
-│   └── main.py                       # Ponto de entrada da aplicação (CLI Argparse)
+│   └── main.py                       # Ponto de entrada (CLI, argumentos e painel)
 │
-├── requirements.txt                  # Dependências de pacotes (Apenas spaCy)
-├── setup.sh                          # Script de automação e ambiente virtual (Linux/macOS)
-├── setup.bat                         # Script de automação e ambiente virtual (Windows)
-└── README.md                         # Documentação oficial do projeto
+├── requirements.txt                  # Dependências ( spaCy e rich de interface )
+├── setup.sh                          # Setup automatizado para Linux/macOS
+├── setup.bat                         # Setup automatizado para Windows
+└── README.md                         # Documentação do projeto
 ```
 
-## Como Executar o Projeto
+## 7. Como Configurar e Executar o Projeto
 
 Para garantir que o ambiente rode perfeitamente sem quebrar caminhos e pacotes, utilize os scripts automatizados fornecidos.
 
-### 1. Configuração Automática do Ambiente
+### 1. Configuração Inicial
 
-Abra o terminal na raiz do projeto e execute o script correspondente ao seu sistema operacional para criar o Ambiente Virtual (venv), instalar as dependências e baixar o modelo de linguagem:
+Execute o script correspondente ao seu sistema operacional para criar o ambiente virtual, atualizar os gerenciadores e baixar o modelo de português do spaCy automaticamente:
 
 * **No Windows:**
 
@@ -97,31 +126,45 @@ Abra o terminal na raiz do projeto e execute o script correspondente ao seu sist
     ./setup.sh
 ```
 
-### 2. Rodando a Aplicação via CLI
+### 2. Ativação Obrigatória do Ambiente Virtual
 
-Com o ambiente ativado, execute o arquivo main.py passando o nome do arquivo de texto alvo. O arquivo deve estar localizado obrigatoriamente dentro da pasta inputs/.
+* **No Windows:**
+
+```text
+    venv\Scripts\activate
+```
+
+* **No Linux / macOS:**
+
+```text
+    source venv/bin/activate
+```
+
+O terminal vai mostrar um prefixo (venv) no começo da linha, indicando que deu certo
 
 
->     # Executa com extração usando a formula `Média + k * Desvio Padrão` (usuário passa 'K' alterando o 1.0 no final)
->     python src/main.py --arquivo youtube.txt --k 1.0
->
->     # Executa para um resumo menor
->     python src/main.py --arquivo youtube.txt --k 2.0
-> 
-> ---
-> 
->     # Executar a análise com o corte padrão de 20% do texto
->     python src/main.py --arquivo youtube.txt
-> 
->     # Executar extraindo apenas os 10% mais importantes do contrato
->     python src/main.py --arquivo youtube.txt --porcentagem 10
-> 
->     # Executar extraindo um resumo mais robusto de 35% do documento
->     python src/main.py --arquivo youtube.txt --porcentagem 35
+### 3. Executando via CLI
 
-## Uso de LLM no Desenvolvimento
+Com a venv ativa, execute o main.py passando os argumentos que desejar para os testes
 
-Conforme o Critério 6 do edital, declara-se que modelos de linguagem de grande escala (LLMs) foram utilizados de forma assistiva durante o desenvolvimento deste trabalho para as seguintes atividades:
+* Execução básica (Usa o corte padrão de 20% do texto)
+```text
+python src/main.py --arquivo youtube.txt
+```
+
+* Mudando a Porcentagem Dinâmica (Extrai os 10% mais importantes do texto)
+```text
+python src/main.py --arquivo instagram.txt --porcentagem 10
+```
+
+* Filtrando por Critério Estatístico (Score > Média + 1.5 * Desvio Padrão)
+```text
+python src/main.py --arquivo twitter.txt --k 1.5
+```
+
+## 8. Uso de LLM no Desenvolvimento
+
+Conforme o Critério 6 do trabalho, declara-se que modelos de linguagem de grande escala (LLMs) foram utilizados de forma assistiva durante o desenvolvimento deste trabalho para as seguintes atividades:
 
 * Estruturação de tipagem estática informativa em trechos críticos das estruturas de dados para acelerar o processo de depuração de ponteiros em Python.
 
