@@ -57,7 +57,7 @@ O pipeline do nosso sistema funciona em três etapas bem definidas:
  [Painel de Resumo CLI]
 ```
 
-## 1. Extração e Filtro de PLN (`processor.py`)
+### 1. Extração e Filtro de PLN (`processor.py`)
 O texto bruto passa pelo motor do `spaCy` (`pt_core_news_sm`) para ser segmentado em frases reais. O filtro limpa pontuações, espaços e *stop words* (como artigos e preposições), e aplica a **lematização** (reduzindo palavras como "reivindicaram" e "reivindicações" para a raiz "reivindicação") com normalização em caixa baixa (`.lower()`).
 
 ### 2. Ponderação TextRank (`textrank.py`)
