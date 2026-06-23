@@ -182,3 +182,13 @@ Conforme o Critério 6 do trabalho, declara-se que modelos de linguagem de grand
 * Estruturação de tipagem estática informativa em trechos críticos das estruturas de dados para acelerar o processo de depuração de ponteiros em Python.
 
 * Formatação do plano arquitetural e documentação técnica descrita neste arquivo.
+
+## 9. Divisão de Responsabilidades e Contribuições 
+
+Para cumprir a exigência de transparência do edital e demonstrar o envolvimento de toda a equipe, o desenvolvimento do ecossistema de software foi mapeado e distribuído estritamente de acordo com as etapas do pipeline do projeto:
+
+1. **Ana Beatriz Souza Araujo:** Desenvolveu a etapa inicial de Processamento de Linguagem Natural, implementando a quebra de sentenças, filtros de limpeza de ruídos e lematização de palavras chaves via *spaCy* (`processor.py`). Também construiu a interface visual final no terminal, sendo responsável por resgatar os dados ordenados e formatar o painel executivo com as molduras e relatórios estatísticos de compressão de leitura (`main.py`).
+2. **Gabriel Alves de Araujo:** Projetou e codificou o motor de afinidade textual e ponderação de arestas (`textrank.py`). Implementou os cruzamentos lógicos de busca entre tabelas hash e inseriu a fórmula de penalidade por comprimento de frase, garantindo o equilíbrio dos pesos no grafo.
+3. **Matheus Pinheiro:** Responsável por projetar e construir do zero as estruturas primitivas de persistência de dados em memória. Implementou a tabela de dispersão (*HashTable*) com tratamento de colisões por Lista Ligada simples (`hash_table.py`) e a modelagem do *Grafo* através de Matriz de Adjacência dinâmica (`graph.py`).
+4. **Gabriel Mota Oliveira:** Desenvolveu o núcleo de inteligência central do grafo, codificando do zero o algoritmo iterativo do *PageRank Ponderado* (`pagerank.py`). Implementou as rodadas de convergência com fator de amortecimento e solucionou o desafio matemático de vazamento de probabilidade através do cálculo e redistribuição síncrona da massa de nós pendentes (*dangling mass*).
+5. **Gustavo Gomes Fornaciari:** Desenvolveu a estrutura  de ordenação do projeto, codificando manualmente a *Árvore Rubro-Negra Esquerdista* (`rne.py`). Projetou a lógica de balanceamento por rotações/cores e o mecanismo estável de comparação de nós, adotando o ID numérico como critério definitivo de desempate para scores idênticos. Por fim, Extraiu os inputs dos sites reais.
