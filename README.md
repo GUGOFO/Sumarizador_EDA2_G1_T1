@@ -38,7 +38,7 @@ Essas bases de dados possuem centenas de sentenças complexas, trechos inteiros 
 Seguindo a regra do trabalho de não usar bibliotecas prontas (como *NetworkX, Pandas ou coleções prontas do Python*), **todas as estruturas fundamentais do projeto foram implementadas do zero pela nossa equipe**:
 
 * **O Grafo de Sentenças (`graph.py`):** Representado por uma **Matriz de Adjacência dinâmica**. Cada frase vira um nó (com ID e score PageRank), conectado a outro (aresta) se compartilharem **pelo menos 2 palavras relevantes em comum**.
-* **A HashTable com Encadeamento (`hash_table.py`):** Armazena e conta a frequência de palavras por frase. O tratamento de colisões usa **Lista Ligada Simples**, inserindo novos nós de maneira eficiente no início da cadeia daquela posição.
+* **A HashTable (`hash_table.py`):** Armazena e conta a frequência de palavras por sentença. O tratamento de colisões usa **Árvore Rubro-Negra Esquerdista**, inserindo novos nós na árvore do index a partir da fórmula de dispersão.
 * **A Árvore Rubro-Negra Esquerdista (`rne.py`):** Organiza o ranking final das frases por meio de um balanceamento perfeito (com rotações e inversão de cores). Se houver empate nos scores de PageRank, usa de forma estável o ID numérico dos vértices como critério de desempate.
 
 ---
@@ -97,7 +97,7 @@ No fim de cada execução, o painel exibe a **Taxa de Compressão de Leitura**, 
 │   │
 │   ├── structures/                   # Nossas estruturas de dados (Feitas à mão)
 │   │   ├── __init__.py
-│   │   ├── hash_table.py             # HashTable manual com lista encadeada
+│   │   ├── hash_table.py             # HashTable manual com ABB RNE
 │   │   ├── graph.py                  # Grafo baseado em Matriz de Adjacência
 │   │   └── rne.py                    # Árvore Rubro-Negra de ordenação
 │   │
@@ -189,6 +189,6 @@ Para cumprir a exigência de transparência do edital e demonstrar o envolviment
 
 1. **Ana Beatriz Souza Araujo:** Desenvolveu a etapa inicial de Processamento de Linguagem Natural, implementando a quebra de sentenças, filtros de limpeza de ruídos e lematização de palavras chaves via *spaCy* (`processor.py`). Também construiu a interface visual final no terminal, sendo responsável por resgatar os dados ordenados e formatar o painel executivo com as molduras e relatórios estatísticos de compressão de leitura (`main.py`).
 2. **Gabriel Alves de Araujo:** Projetou e codificou o motor de afinidade textual e ponderação de arestas (`textrank.py`). Implementou os cruzamentos lógicos de busca entre tabelas hash e inseriu a fórmula de penalidade por comprimento de frase, garantindo o equilíbrio dos pesos no grafo.
-3. **Matheus Pinheiro:** Responsável por projetar e construir do zero as estruturas primitivas de persistência de dados em memória. Implementou a tabela de dispersão (*HashTable*) com tratamento de colisões por Lista Ligada simples (`hash_table.py`) e a modelagem do *Grafo* através de Matriz de Adjacência dinâmica (`graph.py`).
+3. **Matheus Pinheiro:** Responsável por projetar e construir do zero as estruturas primitivas de persistência de dados em memória. Implementou a tabela de dispersão (*HashTable*) com tratamento de colisões por ABB Rubro-Negra Esquerdista (`hash_table.py`) e a modelagem do *Grafo* através de Matriz de Adjacência dinâmica (`graph.py`).
 4. **Gabriel Mota Oliveira:** Desenvolveu o núcleo de inteligência central do grafo, codificando do zero o algoritmo iterativo do *PageRank Ponderado* (`pagerank.py`). Implementou as rodadas de convergência com fator de amortecimento e solucionou o desafio matemático de vazamento de probabilidade através do cálculo e redistribuição síncrona da massa de nós pendentes (*dangling mass*).
 5. **Gustavo Gomes Fornaciari:** Desenvolveu a estrutura  de ordenação do projeto, codificando manualmente a *Árvore Rubro-Negra Esquerdista* (`rne.py`). Projetou a lógica de balanceamento por rotações/cores e o mecanismo estável de comparação de nós, adotando o ID numérico como critério definitivo de desempate para scores idênticos. Por fim, Extraiu os inputs dos sites reais.
